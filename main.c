@@ -5,7 +5,7 @@
 #include <sys/stat.h>
 #include <limits.h>
 #include <errno.h>
-#include <ctype.h> // Добавлен заголовок для isalnum()
+#include <ctype.h>  // Добавлено для isalnum()
 
 void process_file(const char *file_path, const char *word) {
     FILE *file = fopen(file_path, "r");
@@ -42,6 +42,7 @@ void process_file(const char *file_path, const char *word) {
 
     fclose(file);
 }
+
 char *expand_path(const char *path) {
     if (path[0] == '~' && (path[1] == '/' || path[1] == '\0')) {
         const char *home = getenv("HOME");
