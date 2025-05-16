@@ -25,7 +25,7 @@ void process_file(const char *file_path, const char *word) {
 
         while ((found = strstr(found, word)) != NULL) {
             // Проверка границ слова
-            int start_ok = (found == line) || !isalnum((unsigned char)*(found - 1);
+            int start_ok = (found == line) || !isalnum((unsigned char)*(found - 1));
             int end_ok = !isalnum((unsigned char)*(found + word_len));
 
             if (start_ok && end_ok) {
