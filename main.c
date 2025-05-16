@@ -5,6 +5,7 @@
 #include <sys/stat.h>
 #include <limits.h>
 #include <errno.h>
+#include <ctype.h> // Добавлен заголовок для isalnum()
 
 void process_file(const char *file_path, const char *word) {
     FILE *file = fopen(file_path, "r");
@@ -15,48 +16,32 @@ void process_file(const char *file_path, const char *word) {
 
     char line[1024];
     int line_number = 0;
+    size_t word_len = strlen(word);
+
     while (fgets(line, sizeof(line), file)) {
         line_number++;
-        if (strstr(line, word) != NULL) {
+        char *found = line;
+        int found_in_line = 0;
+
+        while ((found = strstr(found, word)) != NULL) {
+            // Проверка границ слова
+            int start_ok = (found == line) || !isalnum((unsigned char)*(found - 1);
+            int end_ok = !isalnum((unsigned char)*(found + word_len));
+
+            if (start_ok && end_ok) {
+                found_in_line = 1;
+                break;
+            }
+            found++;
+        }
+
+        if (found_in_line) {
             printf("%s:%d:%s", file_path, line_number, line);
         }
     }
 
     fclose(file);
 }
-
-void traverse_directory(const char *dir_path, const char *word) {
-    DIR *dir = opendir(dir_path);
-    if (!dir) {
-        fprintf(stderr, "Error opening directory %s: %s\n", dir_path, strerror(errno));
-        return;
-    }
-
-    struct dirent *entry;
-    while ((entry = readdir(dir)) != NULL) {
-        if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
-            continue;
-        }
-
-        char full_path[PATH_MAX];
-        snprintf(full_path, sizeof(full_path), "%s/%s", dir_path, entry->d_name);
-
-        struct stat statbuf;
-        if (lstat(full_path, &statbuf) == -1) {
-            fprintf(stderr, "Error stating %s: %s\n", full_path, strerror(errno));
-            continue;
-        }
-
-        if (S_ISDIR(statbuf.st_mode)) {
-            traverse_directory(full_path, word);
-        } else if (S_ISREG(statbuf.st_mode)) {
-            process_file(full_path, word);
-        }
-    }
-
-    closedir(dir);
-}
-
 char *expand_path(const char *path) {
     if (path[0] == '~' && (path[1] == '/' || path[1] == '\0')) {
         const char *home = getenv("HOME");
